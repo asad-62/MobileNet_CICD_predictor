@@ -9,6 +9,3 @@ A minimal FastAPI-based image classification API using a pre-trained MobileNetV2
 - 🔁 CI/CD via GitHub + Railway auto-deploy
 - ☁️ Serverless hosting (free tier)
 - 🧾 Simple config, no frontend
-
-## 🗂️ Project Structure
-
