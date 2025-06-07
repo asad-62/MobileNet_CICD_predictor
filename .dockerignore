@@ -1,0 +1,6 @@
+__pycache__/
+*.ipynb
+*.tar.gz
+*.zip
+*.egg-info
+*.env
