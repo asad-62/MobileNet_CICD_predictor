@@ -27,6 +27,9 @@ async def predict_route(request: Request, file: UploadFile = File(...)):
     # Else return HTML page
     return templates.TemplateResponse("index.html", {
         "request": request,
-        "result": result
+        "result": result,
+        "face_type": result["face_type"],
+        "glasses": ", ".join(result["suggested_glasses"])
+
     })
 

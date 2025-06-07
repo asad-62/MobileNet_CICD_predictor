@@ -68,9 +68,11 @@
       <button type="submit">Classify</button>
     </form>
 
-    {% if result is defined %}
-      <div class="result">Prediction: {{ result }}</div>
+    {% if face_type is defined %}
+    <div class="result"><strong>Face Type:</strong> {{ face_type }}</div>
+    <div class="result"><strong>Suggested Sunglasses:</strong> {{ glasses }}</div>
     {% endif %}
+
   </div>
 </body>
 </html>
