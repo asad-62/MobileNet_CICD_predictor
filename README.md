@@ -30,10 +30,9 @@ This project uses a deep learning model based on MobileNetV2 to classify human f
 
 ## 🖼 Demo
 
-![demo screenshot](screenshot.png) <!-- Optional: replace with your actual screenshot -->
-
-## 📦 Installation
 ![alt text](<Screenshot from 2025-06-07 23-17-58.png>)
+## 📦 Installation
+
 ```bash
 git clone https://github.com/asad-62/MobileNet_CICD_predictor.git
 cd MobileNet_CICD_predictor
