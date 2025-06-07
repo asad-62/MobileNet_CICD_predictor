@@ -4,13 +4,13 @@ from PIL import Image
 import io
 import torchvision.transforms as transforms
 import torch.hub
-
+from torchvision.models import mobilenet_v2
 # Define class names for face types
 CLASS_NAMES = ['heart', 'long', 'oval', 'round', 'square']
 
 def load_model(model_path="face_type_classifier_final.pth"):
     """Load the trained MobileNetV2 model."""
-    model = torch.hub.load('pytorch/vision:v0.10.0', 'mobilenet_v2', pretrained=False)
+    model = mobilenet_v2(pretrained=False)
     num_ftrs = model.classifier[1].in_features
     model.classifier[1] = torch.nn.Linear(num_ftrs, 5)  # Adjust for 5 classes
     state_dict = torch.load(model_path, map_location='cpu', weights_only=True)
