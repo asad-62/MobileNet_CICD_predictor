@@ -9,20 +9,8 @@ from tensorflow.keras.models import Model
 # Define class names for face types
 CLASS_NAMES = ['heart', 'long', 'oval', 'round', 'square']
 
-def load_model(model_path="face_type_classifier_5classes.h5"):
-    """Load the trained MobileNetV2 model."""
-    base_model = MobileNetV2(weights=None, include_top=False, input_shape=(224, 224, 3))
-    x = base_model.output
-    x = tf.keras.layers.GlobalAveragePooling2D()(x)
-    x = Dense(1024, activation='relu')(x)
-    predictions = Dense(5, activation='softmax')(x)  # Adjust for 5 classes
-    model = Model(inputs=base_model.input, outputs=predictions)
-    model.load_weights(model_path)
-    model.compile(optimizer='adam', loss='categorical_crossentropy')
-    return model
-
 # Load the model
-model = load_model()
+model = tf.keras.models.load_model("face_type_classifier_5classes.h5")
 
 def preprocess(img):
     """Preprocess the input image."""
