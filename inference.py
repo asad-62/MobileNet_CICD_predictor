@@ -25,6 +25,7 @@ from tensorflow.keras.models import load_model
 from PIL import Image
 import numpy as np
 import io
+from tensorflow.keras.applications.mobilenet_v2 import decode_predictions
 
 model = load_model("mobilenetv2_imagenet.h5")
 
@@ -35,8 +36,13 @@ def preprocess(img):
     return img
 
 def predict(image_bytes):
-    img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-    processed = preprocess(img)
-    preds = model.predict(processed)
-    class_idx = preds.argmax()
-    return int(class_idx)
+    try:
+        img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+        processed = preprocess(img)
+        preds = model.predict(processed)
+        decoded = decode_predictions(preds, top=1)[0][0]  # (class_id, label, prob)
+        label = f"{decoded[1]} ({decoded[2]*100:.2f}%)"
+        return label
+    except Exception as e:
+        print("Prediction error:", e)
+        return "error"
