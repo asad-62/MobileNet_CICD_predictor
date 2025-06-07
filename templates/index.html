@@ -1,0 +1,18 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Image Classifier</title>
+</head>
+<body>
+  <h2>Upload an Image</h2>
+  <form action="/predict/" method="post" enctype="multipart/form-data">
+    <input type="file" name="file" accept="image/*" required>
+    <button type="submit">Classify</button>
+  </form>
+
+  {% if result is defined %}
+    <h3>Prediction: {{ result }}</h3>
+  {% endif %}
+</body>
+</html>

@@ -1,14 +1,22 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
-
+from fastapi import FastAPI, UploadFile, File, Request, Form
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 from inference import predict
-import uvicorn
-##
+import io
+
 app = FastAPI()
-@app.post("/predict/")
-async def predict_route(file: UploadFile = File(...)):
-    contents = await file.read()
-    result = predict(contents)
-    return {"result": result}
-    
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+templates = Jinja2Templates(directory="templates")
+
+@app.get("/", response_class=HTMLResponse)
+async def home(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
+@app.post("/predict", response_class=HTMLResponse)
+async def predict_route(request: Request, file: UploadFile = File(...)):
+    image_bytes = await file.read()
+    result = predict(image_bytes)
+    return templates.TemplateResponse("index.html", {
+        "request": request,
+        "result": result
+    })
