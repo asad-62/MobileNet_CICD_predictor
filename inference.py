@@ -8,6 +8,13 @@ from tensorflow.keras.models import Model
 
 # Define class names for face types
 CLASS_NAMES = ['heart', 'long', 'oval', 'round', 'square']
+SUNGLASSES_RECOMMENDATIONS = {
+    "heart": ["Aviator", "Cat-eye"],
+    "long": ["Oversized", "Square/Rectangular"],
+    "oval": ["Square/Rectangular", "Cat-eye"],
+    "round": ["Square/Rectangular", "Cat-eye"],
+    "square": ["Round/Oval", "Aviator"]
+}
 
 # Load the model
 model = tf.keras.models.load_model("face_type_classifier_5classes.h5")
@@ -22,20 +29,27 @@ def preprocess(img):
     return img_array
 
 def predict(image_bytes):
-    """Run inference and decode prediction."""
+    """Run inference and return face type and suggested sunglasses."""
     try:
-        # Open and convert image to RGB
         img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-        # Preprocess image
         image_array = preprocess(img)
-        # Run inference
+
         outputs = model.predict(image_array)
         confidence = np.max(outputs)
         predicted = np.argmax(outputs, axis=1)[0]
         predicted_class = CLASS_NAMES[predicted]
         confidence_score = confidence * 100
-        label = f"{predicted_class} ({confidence_score:.2f}%)"
-        return label
+
+        # Sunglasses recommendation
+        suggestions = SUNGLASSES_RECOMMENDATIONS.get(predicted_class, [])
+
+        result = {
+            "face_type": predicted_class,
+            "confidence": round(confidence_score, 2),
+            "suggested_glasses": suggestions
+        }
+
+        return result
     except Exception as e:
         print("Prediction error:", e)
-        return "error"
+        return {"error": str(e)}
