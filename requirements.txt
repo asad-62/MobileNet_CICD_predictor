@@ -3,4 +3,5 @@ uvicorn
 pillow
 python-multipart
 jinja2
-torch==2.2.0
+tensorflow
+numpy
