@@ -3,16 +3,16 @@ import torch.nn.functional as F
 from PIL import Image
 import io
 import torchvision.transforms as transforms
-from torchvision.models import resnet18
+import torch.hub
 
 # Define class names for face types
 CLASS_NAMES = ['heart', 'long', 'oval', 'round', 'square']
 
-def load_model(model_path="face_type_model.pth"):
-    """Load the trained ResNet18 model."""
-    model = resnet18(pretrained=False)
-    num_ftrs = model.fc.in_features
-    model.fc = torch.nn.Linear(num_ftrs, 5)  # Adjust for 5 classes
+def load_model(model_path="face_type_classifier_final.pth"):
+    """Load the trained MobileNetV2 model."""
+    model = torch.hub.load('pytorch/vision:v0.10.0', 'mobilenet_v2', pretrained=False)
+    num_ftrs = model.classifier[1].in_features
+    model.classifier[1] = torch.nn.Linear(num_ftrs, 5)  # Adjust for 5 classes
     state_dict = torch.load(model_path, map_location='cpu', weights_only=True)
     model.load_state_dict(state_dict)
     model.eval()
