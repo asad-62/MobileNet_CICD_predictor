@@ -16,40 +16,61 @@ SUNGLASSES_RECOMMENDATIONS = {
     "square": ["Round/Oval", "Aviator"]
 }
 
-# Load the model
-model = tf.keras.models.load_model("face_type_classifier_5classes.h5")
+def load_model(model_path: str):
+    """
+    Load and return a Keras model from the given file path.
+    """
+    return tf.keras.models.load_model(model_path)
 
-def preprocess(img):
-    """Preprocess the input image."""
+def preprocess(img: Image.Image) -> np.ndarray:
+    """
+    Preprocess the PIL image:
+    - Resize to 224×224
+    - Scale to [0, 1]
+    - Normalize by ImageNet mean/std
+    - Add batch dimension
+    """
     img = img.resize((224, 224))
-    img_array = np.array(img)
-    img_array = img_array / 255.0  # Normalize to [0,1]
-    img_array = (img_array - [0.485, 0.456, 0.406]) / [0.229, 0.224, 0.225]  # Apply mean and std
-    img_array = np.expand_dims(img_array, axis=0)  # Add batch dimension
-    return img_array
+    img_array = np.array(img) / 255.0
+    img_array = (img_array - [0.485, 0.456, 0.406]) / [0.229, 0.224, 0.225]
+    return np.expand_dims(img_array, axis=0)
 
-def predict(image_bytes):
-    """Run inference and return face type and suggested sunglasses."""
+def preprocess_image(image_path: str) -> np.ndarray:
+    """
+    Load an image from disk and run the preprocess step.
+    """
+    img = Image.open(image_path).convert("RGB")
+    return preprocess(img)
+
+def predict(image_bytes: bytes) -> dict:
+    """
+    Run inference on raw image bytes. Returns a dict with:
+    - face_type (str)
+    - confidence (float percent)
+    - suggested_glasses (list)
+    """
     try:
         img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-        image_array = preprocess(img)
-
-        outputs = model.predict(image_array)
-        confidence = np.max(outputs)
-        predicted = np.argmax(outputs, axis=1)[0]
-        predicted_class = CLASS_NAMES[predicted]
-        confidence_score = confidence * 100
-
-        # Sunglasses recommendation
-        suggestions = SUNGLASSES_RECOMMENDATIONS.get(predicted_class, [])
-
-        result = {
-            "face_type": predicted_class,
-            "confidence": round(confidence_score, 2),
-            "suggested_glasses": suggestions
+        arr = preprocess(img)
+        model = load_model("face_type_classifier_5classes.h5")
+        outputs = model.predict(arr)
+        idx = int(np.argmax(outputs, axis=1)[0])
+        cls = CLASS_NAMES[idx]
+        confidence = float(np.max(outputs) * 100)
+        return {
+            "face_type": cls,
+            "confidence": round(confidence, 2),
+            "suggested_glasses": SUNGLASSES_RECOMMENDATIONS.get(cls, [])
         }
-
-        return result
     except Exception as e:
-        print("Prediction error:", e)
         return {"error": str(e)}
+
+def predict_face_type(model, image_path: str) -> str:
+    """
+    Given a loaded model and path to an image, return the face type
+    (title-cased) without extra info.
+    """
+    arr = preprocess_image(image_path)
+    outputs = model.predict(arr)
+    idx = int(np.argmax(outputs, axis=1)[0])
+    return CLASS_NAMES[idx].title()
