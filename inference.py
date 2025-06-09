@@ -2,9 +2,6 @@ import tensorflow as tf
 from PIL import Image
 import io
 import numpy as np
-from tensorflow.keras.applications import MobileNetV2
-from tensorflow.keras.layers import Dense
-from tensorflow.keras.models import Model
 
 # Define class names for face types
 CLASS_NAMES = ['heart', 'long', 'oval', 'round', 'square']

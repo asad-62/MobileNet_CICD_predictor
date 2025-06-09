@@ -1,9 +1,7 @@
-from fastapi import FastAPI, UploadFile, File, Request, Form
+from fastapi import FastAPI, UploadFile, File, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from fastapi.staticfiles import StaticFiles
 from inference import predict
-import io
 from fastapi.responses import JSONResponse
 
 app = FastAPI()
