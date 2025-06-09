@@ -47,6 +47,4 @@ jobs:
       - name: Deploy to Railway
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-        run: |
-          railway login --browserless
-          railway up --detach
+        run: railway up --detach
