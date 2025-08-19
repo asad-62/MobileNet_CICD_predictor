@@ -22,13 +22,14 @@ demo = gr.Interface(
     fn=gradio_predict,
     inputs=gr.Image(type="pil", label="Upload Face Image"),
     outputs=[
-        gr.Label(label="Predicted Face Type"),
-        gr.Label(label="Confidence"),
-        gr.Label(label="Suggested Sunglasses"),
+        gr.Textbox(label="Predicted Face Type"),
+        gr.Textbox(label="Confidence"),
+        gr.Textbox(label="Suggested Sunglasses"),
     ],
     title="Face Type Classifier + Sunglasses Recommender 😎",
-    description="Upload an image and get face type + sunglasses recommendations using MobileNetV2."
+    description="Upload an image and get face type + sunglasses recommendations using MobileNetV2.",
 )
+
 
 if __name__ == "__main__":
     demo.launch()
