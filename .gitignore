@@ -1,2 +1,4 @@
 actions-runner/
-mobilenetv2_imagenet.h5
+mobilenetv2_imagenet.h5*.pyc
+*.h5
+__pycache__/

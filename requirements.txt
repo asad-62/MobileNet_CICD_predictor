@@ -1,5 +1,4 @@
-fastapi
-uvicorn
+gradio
 pillow
 python-multipart
 jinja2
