@@ -1,18 +1,25 @@
-install:
-	pip install --upgrade pip && \
-	pip install -r requirements.txt
+.PHONY: test api ui health metrics clean syntax check
 
-format:
-	black *.py
+check: syntax test
 
 test:
-	pytest --maxfail=1 --disable-warnings -q || true
+	PYTHONPATH=. pytest -q
 
-hf-login:
-	pip install -U "huggingface_hub[cli]"
-	huggingface-cli login --token $(HF_TOKEN) --add-to-git-credential
+api:
+	PYTHONPATH=. uvicorn app.main:api --reload --host 0.0.0.0 --port 7860
 
-deploy: hf-login
-	huggingface-cli upload asad2662/face-type-classifier . \
-		--repo-type=space \
-		--commit-message "Auto-deploy from GitHub Actions"
+ui:
+	PYTHONPATH=. python -m app.gradio_app
+
+health:
+	curl -s http://localhost:7860/health | python -m json.tool
+
+metrics:
+	curl -s http://localhost:7860/metrics | python -m json.tool
+
+syntax:
+	python -m py_compile app/main.py app/inference.py app/gradio_app.py app/monitoring.py app/schemas.py app/recommender.py app/config.py
+
+clean:
+	find . -type d -name "__pycache__" -exec rm -rf {} +
+	find . -type f -name "*.pyc" -delete

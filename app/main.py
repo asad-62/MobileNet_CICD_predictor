@@ -1,0 +1,100 @@
+from uuid import uuid4
+
+import gradio as gr
+from fastapi import FastAPI, File, UploadFile
+from fastapi.responses import JSONResponse
+
+from app.config import CLASS_NAMES, MODEL_NAME, MODEL_VERSION
+from app.gradio_app import demo
+from app.inference import predict
+from app.monitoring import get_prediction_metrics, log_prediction
+from app.schemas import ErrorResponse, PredictionResponse
+
+api = FastAPI(
+    title="Face Type Classifier API",
+    description="Production-style API for face type classification and sunglasses recommendation.",
+    version="1.0.0",
+)
+
+
+@api.get("/")
+def root():
+    return {
+        "service": "face-type-classifier",
+        "status": "running",
+    }
+
+
+@api.get("/health")
+def health():
+    return {
+        "status": "ok",
+        "model_name": MODEL_NAME,
+        "model_version": MODEL_VERSION,
+    }
+
+
+@api.get("/model-info")
+def model_info():
+    return {
+        "model_name": MODEL_NAME,
+        "model_version": MODEL_VERSION,
+        "classes": CLASS_NAMES,
+    }
+
+
+@api.get("/metrics")
+def metrics():
+    return get_prediction_metrics()
+
+@api.post(
+    "/predict",
+    response_model=PredictionResponse,
+    responses={400: {"model": ErrorResponse}},
+)
+async def predict_face(file: UploadFile = File(...)):
+    prediction_id = str(uuid4())
+
+    if not file.content_type or not file.content_type.startswith("image/"):
+        error = ErrorResponse(
+            prediction_id=prediction_id,
+            error="Uploaded file must be an image.",
+            latency_ms=None,
+        )
+        log_prediction(error.model_dump())
+
+        return JSONResponse(status_code=400, content=error.model_dump())
+
+    image_bytes = await file.read()
+
+    if len(image_bytes) == 0:
+        error = ErrorResponse(
+            prediction_id=prediction_id,
+            error="Uploaded image is empty.",
+            latency_ms=None,
+        )
+        log_prediction(error.model_dump())
+
+        return JSONResponse(status_code=400, content=error.model_dump())
+
+    result = predict(image_bytes)
+
+    if "error" in result:
+        error = ErrorResponse(
+            prediction_id=prediction_id,
+            error=result["error"],
+            latency_ms=result.get("latency_ms"),
+        )
+        log_prediction(error.model_dump())
+
+        return JSONResponse(status_code=400, content=error.model_dump())
+
+    result["prediction_id"] = prediction_id
+    response = PredictionResponse(**result)
+    
+    log_prediction(response.model_dump())
+
+
+    return response
+
+api = gr.mount_gradio_app(api, demo, path="/ui")

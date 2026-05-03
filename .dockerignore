@@ -1,6 +1,11 @@
 __pycache__/
-*.ipynb
-*.tar.gz
-*.zip
-*.egg-info
-*.env
+*.pyc
+.git/
+.gitignore
+logs/
+*.log
+Makefile.bak
+test/
+tests/inference_old.py
+Screenshot*
+/face_type_classifier.keras

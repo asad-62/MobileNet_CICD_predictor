@@ -1,0 +1,15 @@
+services:
+    face-type-recommender:
+        build: .
+        image: face-type-recommender:latest
+        container_name: face-type-recommender
+        ports:
+            - "7860:7860"
+
+        volumes:
+            - ./logs:/app/logs
+        environment:
+        - PYTHONUNBUFFERED=1
+        - PYTHONPATH=/app   
+
+        restart: unless-stopped        

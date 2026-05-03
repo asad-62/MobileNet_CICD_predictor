@@ -2,3 +2,14 @@ actions-runner/
 mobilenetv2_imagenet.h5*.pyc
 *.h5
 __pycache__/
+*.pyc
+.pytest_cache/
+.gradio/
+logs/
+*.log
+
+.env
+.venv/
+venv/
+
+Makefile.bak

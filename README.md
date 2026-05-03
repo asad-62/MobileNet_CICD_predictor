@@ -1,39 +1,40 @@
-# Face Type Classifier + Sunglasses Recommender 😎
+# Face Type Classifier + Sunglasses Recommender
 
-This project uses a deep learning model based on MobileNetV2 to classify human face types from images. Based on the predicted face shape, it suggests the most suitable sunglasses styles.
+Production-style deep learning inference service for face type classification and sunglasses recommendation.
 
-## 🔍 Face Types Supported
+The system uses a MobileNetV2-based image classifier to predict face shape and applies a rule-based recommendation layer to suggest suitable sunglasses.
 
-- Heart
-- Long
-- Oval
-- Round
-- Square
+## Current Status
 
-## 😎 Sunglasses Recommendation Mapping
-
-| Face Type | Suggested Sunglasses |
-|-----------|----------------------|
-| Heart     | Aviator, Cat-eye     |
-| Long      | Oversized, Square/Rectangular |
-| Oval      | Square/Rectangular, Cat-eye |
-| Round     | Square/Rectangular, Cat-eye |
-| Square    | Round/Oval, Aviator  |
-
-## 🚀 Features
+This project includes:
 
 - FastAPI backend
-- Web-based UI (upload and classify images)
-- REST API endpoint for programmatic access
-- Styled with modern dark UI
-- Deployed on Railway
+- Gradio web UI
+- TensorFlow/Keras inference
+- Pydantic response schemas
+- Prediction logging
+- Basic monitoring endpoint
+- Docker support
+- Docker Compose support
+- Automated tests
+- Health and model metadata endpoints
 
-## 🖼 Demo
+## System Architecture
 
-![alt text](<Screenshot from 2025-06-07 23-17-58.png>)
-## 📦 Installation
-
-```bash
-git clone https://github.com/asad-62/MobileNet_CICD_predictor.git
-cd MobileNet_CICD_predictor
-pip install -r requirements.txt
+```text
+User
+  |
+  v
+Gradio UI          FastAPI API
+  |                    |
+  |                    v
+  +-------------> Inference Service
+                       |
+                       v
+              MobileNetV2 Keras Model
+                       |
+                       v
+              Sunglasses Recommender
+                       |
+                       v
+             Prediction Logs + Metrics
