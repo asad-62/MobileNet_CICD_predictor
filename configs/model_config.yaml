@@ -1,0 +1,37 @@
+model:
+  name: mobilenetv2-face-type-classifier
+  version: 1.0.0
+  path: models/face_type_classifier.keras
+  framework: tensorflow-keras
+
+input:
+  image_size: [224, 224]
+  color_mode: RGB
+
+classes:
+  - heart
+  - long
+  - oval
+  - round
+  - square
+
+confidence:
+  low_threshold: 0.60
+  high_threshold: 0.80
+
+recommendations:
+  heart:
+    - Aviator
+    - Cat-eye
+  long:
+    - Oversized
+    - Square/Rectangular
+  oval:
+    - Square/Rectangular
+    - Cat-eye
+  round:
+    - Square/Rectangular
+    - Cat-eye
+  square:
+    - Round/Oval
+    - Aviator
