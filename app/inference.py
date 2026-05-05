@@ -18,6 +18,8 @@ from app.config import (
     MODEL_NAME,
     MODEL_PATH,
     MODEL_VERSION,
+    MIN_IMAGE_HEIGHT,
+    MIN_IMAGE_WIDTH,
 )
 from app.recommender import recommend_sunglasses
 
@@ -54,6 +56,16 @@ def predict(image_bytes: bytes) -> dict[str, Any]:
 
     try:
         img = Image.open(io.BytesIO(image_bytes))
+        img.load()
+
+        width, height = img.size
+
+        if width < MIN_IMAGE_WIDTH or height < MIN_IMAGE_HEIGHT:
+            raise ValueError(
+                f"Image is too small. Minimum size is {MIN_IMAGE_WIDTH}x{MIN_IMAGE_HEIGHT}."
+            )
+
+       # arr = preprocess_image(img)
         arr = preprocess_image(img)
 
         outputs = MODEL.predict(arr, verbose=0)[0]

@@ -4,7 +4,13 @@ import gradio as gr
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse
 
-from app.config import CLASS_NAMES, MODEL_NAME, MODEL_VERSION
+from app.config import (
+    ALLOWED_IMAGE_TYPES,
+    CLASS_NAMES,
+    MAX_UPLOAD_BYTES,
+    MODEL_NAME,
+    MODEL_VERSION,
+)
 from app.gradio_app import demo
 from app.inference import predict
 from app.monitoring import get_prediction_metrics, log_prediction
@@ -55,7 +61,7 @@ def metrics():
 async def predict_face(file: UploadFile = File(...)):
     prediction_id = str(uuid4())
 
-    if not file.content_type or not file.content_type.startswith("image/"):
+    if file.content_type not in ALLOWED_IMAGE_TYPES:
         error = ErrorResponse(
             prediction_id=prediction_id,
             error="Uploaded file must be an image.",
@@ -66,6 +72,15 @@ async def predict_face(file: UploadFile = File(...)):
         return JSONResponse(status_code=400, content=error.model_dump())
 
     image_bytes = await file.read()
+    if len(image_bytes) > MAX_UPLOAD_BYTES:
+        error = ErrorResponse(
+            prediction_id=prediction_id,
+            error="Uploaded image is too large. Maximum allowed size is 5 MB.",
+            latency_ms=None,
+        )
+        log_prediction(error.model_dump())
+
+        return JSONResponse(status_code=400, content=error.model_dump())
 
     if len(image_bytes) == 0:
         error = ErrorResponse(
