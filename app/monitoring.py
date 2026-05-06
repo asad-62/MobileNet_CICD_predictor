@@ -2,14 +2,39 @@ import json
 from datetime import datetime, timezone
 from typing import Any
 from pathlib import Path
-
 from app.config import LOG_DIR
+from prometheus_client import Counter, Histogram
 
 ####
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 PREDICTION_LOG_PATH = LOG_DIR / "predictions.log"
 ####
+#### for prometheus metrics
+PREDICTIONS_TOTAL = Counter(
+    "face_predictions_total",
+    "Total successful face type predictions",
+)
 
+PREDICTION_ERRORS_TOTAL = Counter(
+    "face_prediction_errors_total",
+    "Total prediction errors",
+)
+
+LOW_CONFIDENCE_TOTAL = Counter(
+    "face_prediction_low_confidence_total",
+    "Total low confidence predictions",
+)
+
+PREDICTION_LATENCY_SECONDS = Histogram(
+    "face_prediction_latency_seconds",
+    "Prediction latency in seconds",
+)
+
+PREDICTION_CLASS_TOTAL = Counter(
+    "face_prediction_class_total",
+    "Predictions by face type",
+    ["class_name"],
+)
 
 def log_prediction(event:dict[str,Any])->None:
     """
@@ -92,3 +117,21 @@ def get_prediction_metrics() -> dict[str, Any]:
         "average_latency_ms": average_latency_ms,
         "low_confidence_count": low_confidence_count,
     }
+
+
+def record_prometheus_metrics(event: dict[str, Any]) -> None:
+    latency_ms = event.get("latency_ms")
+    if latency_ms is not None:
+        PREDICTION_LATENCY_SECONDS.observe(float(latency_ms) / 1000)
+
+    if "error" in event:
+        PREDICTION_ERRORS_TOTAL.inc()
+        return
+    PREDICTIONS_TOTAL.inc()
+    face_type = event.get("face_type")
+    if face_type:
+        PREDICTION_CLASS_TOTAL.labels(class_name=face_type).inc()
+
+    if event.get("confidence_label") == "low":
+        LOW_CONFIDENCE_TOTAL.inc()
+

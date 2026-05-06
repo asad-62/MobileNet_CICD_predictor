@@ -1,9 +1,11 @@
+from urllib import response
 from uuid import uuid4
 
+from fastapi.responses import JSONResponse, Response
 import gradio as gr
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse
-
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from app.config import (
     ALLOWED_IMAGE_TYPES,
     CLASS_NAMES,
@@ -13,7 +15,7 @@ from app.config import (
 )
 from app.gradio_app import demo
 from app.inference import predict
-from app.monitoring import get_prediction_metrics, log_prediction
+from app.monitoring import get_prediction_metrics, log_prediction, record_prometheus_metrics
 from app.schemas import ErrorResponse, PredictionResponse
 
 api = FastAPI(
@@ -52,6 +54,12 @@ def model_info():
 @api.get("/metrics")
 def metrics():
     return get_prediction_metrics()
+## prometheus metrics endpoint
+@api.get("/prometheus")
+def prometheus_metrics():
+    return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
+
+
 
 @api.post(
     "/predict",
@@ -68,6 +76,7 @@ async def predict_face(file: UploadFile = File(...)):
             latency_ms=None,
         )
         log_prediction(error.model_dump())
+        record_prometheus_metrics(error.model_dump())
 
         return JSONResponse(status_code=400, content=error.model_dump())
 
@@ -79,7 +88,7 @@ async def predict_face(file: UploadFile = File(...)):
             latency_ms=None,
         )
         log_prediction(error.model_dump())
-
+        record_prometheus_metrics(error.model_dump())
         return JSONResponse(status_code=400, content=error.model_dump())
 
     if len(image_bytes) == 0:
@@ -89,7 +98,7 @@ async def predict_face(file: UploadFile = File(...)):
             latency_ms=None,
         )
         log_prediction(error.model_dump())
-
+        record_prometheus_metrics(error.model_dump())
         return JSONResponse(status_code=400, content=error.model_dump())
 
     result = predict(image_bytes)
@@ -101,15 +110,14 @@ async def predict_face(file: UploadFile = File(...)):
             latency_ms=result.get("latency_ms"),
         )
         log_prediction(error.model_dump())
-
+        record_prometheus_metrics(error.model_dump())
         return JSONResponse(status_code=400, content=error.model_dump())
 
     result["prediction_id"] = prediction_id
     response = PredictionResponse(**result)
     
     log_prediction(response.model_dump())
-
-
+    record_prometheus_metrics(response.model_dump())
     return response
 
 api = gr.mount_gradio_app(api, demo, path="/ui")
