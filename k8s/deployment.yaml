@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: face-type-recommender
+  namespace: face-type-ai
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: face-type-recommender
+  template:
+    metadata:
+      labels:
+        app: face-type-recommender
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/prometheus"
+        prometheus.io/port: "7860"
+    spec:
+      containers:
+        - name: face-type-recommender
+          image: face-type-recommender:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 7860
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 7860
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 7860
+            initialDelaySeconds: 40
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "1"
+              memory: "2Gi"
