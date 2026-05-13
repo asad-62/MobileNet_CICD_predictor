@@ -1,0 +1,27 @@
+app:
+  name: face-type-recommender
+
+image:
+  repository: face-type-recommender
+  tag: latest
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+
+service:
+  type: ClusterIP
+  port: 7860
+  targetPort: 7860
+
+resources:
+  requests:
+    cpu: "500m"
+    memory: "1Gi"
+  limits:
+    cpu: "1"
+    memory: "2Gi"
+
+prometheus:
+  enabled: true
+  path: /prometheus
+  port: "7860"
