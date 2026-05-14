@@ -1,5 +1,4 @@
-.PHONY: test api ui health metrics clean syntax check
-
+.PHONY: test api ui health metrics clean syntax check eval
 check: syntax test
 
 test:
@@ -23,3 +22,7 @@ syntax:
 clean:
 	find . -type d -name "__pycache__" -exec rm -rf {} +
 	find . -type f -name "*.pyc" -delete
+
+
+eval:
+	PYTHONPATH=. python scripts/evaluate_model.py	
