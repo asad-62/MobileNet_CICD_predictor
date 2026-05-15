@@ -1,0 +1,13 @@
+FROM face-type-recommender:latest
+
+WORKDIR /app
+
+RUN pip install --no-cache-dir prometheus-client
+
+COPY app/ app/
+COPY configs/ configs/
+COPY models/ models/
+COPY README.md .
+COPY model_card.md .
+
+CMD ["uvicorn", "app.main:api", "--host", "0.0.0.0", "--port", "7860"]

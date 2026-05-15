@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: face-type-recommender
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  namespaceSelector:
+    matchNames:
+      - face-type-ai
+  selector:
+    matchLabels:
+      app: face-type-recommender
+  endpoints:
+    - port: http
+      path: /prometheus
+      interval: 15s
