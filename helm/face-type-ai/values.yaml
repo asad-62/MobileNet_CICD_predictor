@@ -25,3 +25,17 @@ prometheus:
   enabled: true
   path: /prometheus
   port: "7860"
+
+
+ingress:
+  enabled: true
+  className: nginx
+  host: face-type-ai.local
+
+serviceMonitor:
+  enabled: true
+  namespace: monitoring
+  releaseLabel: monitoring
+  path: /prometheus
+  interval: 15s
+  port: http  
